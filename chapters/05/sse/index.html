@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<script>
+    let eventSource
+    let running
+
+    function start(path) {
+        if (running) {
+            log("Feed already running")
+            return
+        }
+        running = true
+        if (!window.EventSource) {
+            // IE or an old browser
+            alert("The browser doesn't support EventSource.")
+            return
+        }
+
+        eventSource = new EventSource(path)
+
+        eventSource.onopen = function (e) {
+            log("Event: open")
+        }
+
+        eventSource.onerror = function (e) {
+            log("Event: error")
+            if (this.readyState == EventSource.CONNECTING) {
+                log(`Reconnecting (readyState=${this.readyState})...`)
+            } else {
+                log("Error has occured. State=", this.readyState)
+                console.log(e)
+            }
+        }
+
+        eventSource.addEventListener('bye', function (e) {
+            log("Event: bye, data: " + e.data)
+            stop()
+        })
+
+        eventSource.onmessage = function (e) {
+            log("Event: message, data: " + e.data)
+        }
+
+        eventSource.addEventListener('login', function (e) {
+            log("Event: login, data: " + e.data)
+        })
+    }
+
+    function stop() {
+        running = false
+        do_stop()
+    }
+
+    function do_stop() {
+        eventSource.close()
+        log("eventSource.close()")
+    }
+
+    function log(msg) {
+        console.log(msg)
+        logElem.innerHTML += msg + "<br>"
+        document.documentElement.scrollTop = 99999999
+    }
+
+    function reset() {
+        document.querySelector("#logElem").innerHTML = ""
+    }
+</script>
+<button onclick="start('/sse')">Start</button>
+<button onclick="stop()">Stop</button>
+<button onclick="reset()">Clear</button>
+<pre id="logElem" style="margin: 6px 0"></pre>

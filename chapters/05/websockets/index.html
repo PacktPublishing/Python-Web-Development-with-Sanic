@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<script>
+    const socket = new WebSocket("ws://localhost:9999/chat")
+
+    socket.addEventListener('message', function (event) {
+        log(event.data, "Other me");
+    })
+
+    function goToBottom() {
+        if (chatElem.scrollTop + chatElem.clientHeight !== chatElem.scrollHeight) {
+            chatElem.scrollTop = chatElem.scrollHeight;
+        }
+    }
+
+    function send() {
+        log(inputElem.value, "Me")
+        socket.send(inputElem.value)
+        inputElem.value = ""
+    }
+
+    function log(msg, who) {
+        chatElem.innerHTML += `<p>${who}: ${msg}</p>`
+        goToBottom()
+    }
+</script>
+<style>
+    div {
+        height: 350px;
+        width: 250px;
+        border: solid 1px black;
+        overflow-y: scroll;
+        font-family: monospace;
+    }
+    textarea {
+        width: 250px;
+        border: solid 1px black;
+    }
+</style>
+<div id="chatElem"></div>
+<textarea id="inputElem" placeholder="Enter message ..."></textarea>
+<button onclick="send()">Send</button>
