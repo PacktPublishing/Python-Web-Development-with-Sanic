@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>CORS issue</title>
+
+    <body>
+        <h1>Loading...</h1>
+        <script>
+            const element = document.querySelector("h1")
+            fetch("http://localhost:7777/Adam").then(async response => {
+                const text = await response.text()
+                element.innerHTML = text
+            })
+        </script>
+    </body>

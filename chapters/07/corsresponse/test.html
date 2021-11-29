@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>CORS issue</title>
+
+    <body>
+        <h1>CORS Testing</h1>
+        <h2 id="foobar">Loading...</h2>
+        <script>
+            const element = document.querySelector("#foobar")
+            fetch("http://localhost:7777/", {
+                headers: {origin: "http://localhost:7777"}
+            }).then(async response => {
+                element.innerHTML = `foobar='${response.headers.get("foobar")}'`
+            })
+        </script>
+    </body>
