@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ch08-k8s-app-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-tls
+    # certmanager.k8s.io/acme-challenge-type: http01
+spec:
+  # tls:
+  #   - hosts:
+  #       - example.com
+  #     secretName: ch08-k8s-tls
+  rules:
+    - host: "example.com"
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: ch08-k8s-app
+                port:
+                  number: 80

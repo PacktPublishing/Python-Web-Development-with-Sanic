@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ch08-k8s-app
+spec:
+  ports:
+    - port: 80
+      targetPort: 7777
+  selector:
+    app: ch08-k8s-app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ch08-k8s-app
+spec:
+  selector:
+    matchLabels:
+      app: ch08-k8s-app
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: ch08-k8s-app
+    spec:
+      containers:
+        - name: ch08-k8s-app
+          image: admhpkns/my-sanic-example-app:2
+          ports:
+            - containerPort: 7777
