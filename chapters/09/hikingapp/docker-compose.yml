@@ -1,0 +1,37 @@
+services:
+  app:
+    build: ./application
+    ports:
+      - 7777:7777
+    depends_on:
+      - db-postgres
+      - db-redis
+    command:
+      sanic
+      --port=7777
+      --host=0.0.0.0
+      --workers=2
+      --factory
+      --debug
+      hiking.server:create_app
+    volumes:
+      - ./application/hiking:/app/hiking
+    environment:
+      SANIC_POSTGRES_DSN: "postgres://postgres:foobar@db-postgres:5432"
+      SANIC_POSTGRES_MIN: 6
+      SANIC_POSTGRES_MAX: 12
+      SANIC_REDIS_DSN: "redis://db-redis:6379"
+      SANIC_REDIS_MAX: 12
+      SANIC_KEEP_ALIVE_TIMEOUT: 1
+  db-postgres:
+    build: ./postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=foobar
+    volumes:
+      - ./postgres/initial.sql:/docker-entrypoint-initdb.d/initial.sql
+  db-redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
