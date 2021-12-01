@@ -1,0 +1,18 @@
+type Country {
+    code: String
+    name: String
+    continent: String
+    region: String
+    surfacearea: Int
+    indepyear: Int
+    population: Int
+    lifeexpectancy: Int
+    gnp: Float
+    gnpold: Float
+    localname: String
+    governmentform: String
+    headofstate: String
+    capital: City
+    code2: String
+    languages: [Language]
+}

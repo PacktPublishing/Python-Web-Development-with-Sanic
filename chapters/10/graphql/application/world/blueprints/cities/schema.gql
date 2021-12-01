@@ -1,0 +1,8 @@
+type City {
+    id: Int
+    name: String
+    countrycode: String
+    district: String
+    population: Int
+    languages: [Language]
+}

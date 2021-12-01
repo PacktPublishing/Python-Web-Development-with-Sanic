@@ -1,0 +1,24 @@
+services:
+  app:
+    build: ./application
+    ports:
+      - 7777:7777
+    depends_on:
+      - db-redis
+    command:
+      sanic
+      --port=7777
+      --host=0.0.0.0
+      --workers=2
+      --factory
+      --debug
+      feeder.server:create_app
+    volumes:
+      - ./application/feeder:/app/feeder
+    environment:
+      SANIC_REDIS_DSN: "redis://db-redis:6379"
+      SANIC_REDIS_MAX: 12
+  db-redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379

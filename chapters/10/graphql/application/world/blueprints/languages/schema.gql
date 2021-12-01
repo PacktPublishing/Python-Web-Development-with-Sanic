@@ -1,0 +1,6 @@
+type Language {
+    countrycode: String
+    language: String
+    isofficial: Boolean
+    percentage: Float
+}
