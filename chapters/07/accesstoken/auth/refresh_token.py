@@ -9,5 +9,5 @@ def generate_token():
     return api_key, hashed_key
 
 
-async def store_refresh_token(user: User, hased_key: str) -> None:
-    user.refresh_hash = hased_key
+async def store_refresh_token(user: User, hashed_key: str) -> None:
+    user.refresh_hash = hashed_key
