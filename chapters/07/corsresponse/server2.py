@@ -7,7 +7,7 @@ app.config.ALLOWED_ORIGINS = ["http://127.0.0.1:8888", "http://127.0.0.1:7777"]
 
 
 @app.get("/")
-async def handler(request):
+async def handler(request: Request) -> HTTPResponse:
     response = text("Hi")
     response.headers["foobar"] = "hello, 123"
     return response
@@ -16,12 +16,12 @@ async def handler(request):
 app.static("/test", "./test.html")
 
 
-async def options_handler(request):
+async def options_handler(request: Request) -> HTTPResponse:
     return response.empty()
 
 
 @app.before_server_start
-def add_info_handlers(app: Sanic, _):
+def add_info_handlers(app: Sanic, _) -> None:
     app.router.reset()
     for group in app.router.groups.values():
         if "OPTIONS" not in group.methods:
@@ -34,7 +34,7 @@ def add_info_handlers(app: Sanic, _):
     app.router.finalize()
 
 
-def is_preflight(request: Request):
+def is_preflight(request: Request) -> bool:
     return (
         request.method == "OPTIONS"
         and "access-control-request-method" in request.headers

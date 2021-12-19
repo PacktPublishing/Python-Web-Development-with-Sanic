@@ -12,7 +12,7 @@ app.config.ALLOWED_ORIGINS = [
 
 
 @app.route("/", methods=["post", "patch", "get"])
-async def handler(request):
+async def handler(request: Request) -> HTTPResponse:
     response = text("Hi")
     response.headers["foobar"] = "hello, 123"
     return response
@@ -21,7 +21,7 @@ async def handler(request):
 app.static("/test", "./test.html")
 
 
-async def options_handler(request, methods):
+async def options_handler(request: Request, methods: list[str]) -> HTTPResponse:
     resp = response.empty()
     if request.ctx.preflight:
         resp.headers["access-control-allow-credentials"] = "true"
@@ -31,7 +31,7 @@ async def options_handler(request, methods):
 
 
 @app.before_server_start
-def add_info_handlers(app: Sanic, _):
+def add_info_handlers(app: Sanic, _) -> None:
     app.router.reset()
     for group in app.router.groups.values():
         if "OPTIONS" not in group.methods:
@@ -45,7 +45,7 @@ def add_info_handlers(app: Sanic, _):
     app.router.finalize()
 
 
-def is_preflight(request: Request):
+def is_preflight(request: Request) -> bool:
     return (
         request.method == "OPTIONS"
         and "access-control-request-method" in request.headers

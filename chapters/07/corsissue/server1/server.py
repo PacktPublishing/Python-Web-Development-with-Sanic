@@ -1,10 +1,10 @@
-from sanic import Sanic, text
+from sanic import HTTPResponse, Request, Sanic, text
 
 app = Sanic(__name__)
 
 
 @app.get("/<name>")
-async def handler(request, name):
+async def handler(request: Request, name: str) -> HTTPResponse:
     return text(f"Hi {name}")
 
 

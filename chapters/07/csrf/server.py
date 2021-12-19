@@ -1,4 +1,6 @@
 from base64 import b64decode, b64encode
+from typing import Literal
+
 from sanic import Sanic, text, Request, HTTPResponse
 from functools import wraps
 from inspect import isawaitable
@@ -45,20 +47,20 @@ def csrf_protected(func):
 
 
 @app.on_request
-async def check_request(request: Request):
+async def check_request(request: Request) -> None:
     request.ctx.from_browser = (
         "origin" in request.headers or "browser_check" in request.cookies
     )
 
 
 @app.on_response
-async def mark_browser(_, response: HTTPResponse):
+async def mark_browser(_, response: HTTPResponse) -> None:
     response.cookies["browser_check"] = "1"
     response.cookies["browser_check"]["domain"] = "localhost"
     response.cookies["browser_check"]["httponly"] = True
 
 
-def generate_csrf(secret, ref_length, padding):
+def generate_csrf(secret: str, ref_length: int, padding: int) -> tuple[str, str]:
     cipher = Fernet(secret)
     ref = os.urandom(ref_length)
     pad = os.urandom(padding)
@@ -67,7 +69,7 @@ def generate_csrf(secret, ref_length, padding):
     return ref.hex(), b64encode(pad + pretoken).decode("utf-8")
 
 
-def verify_csrf(secret, padding, ref, token):
+def verify_csrf(secret: str, padding: int, ref: str, token: str) -> None:
     if not ref or not token:
         raise InvalidToken("Token is incorrect")
 
@@ -80,7 +82,7 @@ def verify_csrf(secret, padding, ref, token):
         raise InvalidToken("Token is incorrect")
 
 
-def csrf_check(request: Request):
+def csrf_check(request: Request) -> Literal[True]:
     csrf_header = request.headers.get("x-xsrf-token")
     csrf_cookie = request.cookies.get("csrf_token")
     ref_token = request.cookies.get("ref_token")
@@ -102,7 +104,7 @@ def csrf_check(request: Request):
 
 
 @app.on_response
-async def inject_csrf_token(request: Request, response: HTTPResponse):
+async def inject_csrf_token(request: Request, response: HTTPResponse) -> None:
     response.cookies["myfavorite"] = "chocolatechip"
     response.cookies["myfavorite"]["domain"] = "mydomain.com"
     response.cookies["myfavorite"]["samesite"] = None
@@ -135,10 +137,10 @@ async def inject_csrf_token(request: Request, response: HTTPResponse):
 
 @app.post("/")
 @csrf_protected
-async def handler(request):
+async def handler(request: Request) -> HTTPResponse:
     return text("Hi")
 
 
 @app.get("/start")
-async def handler2(request):
+async def handler2(request: Request) -> HTTPResponse:
     return text("Hi")
