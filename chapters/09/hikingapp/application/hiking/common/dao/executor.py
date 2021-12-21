@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Set, Type
-from hiking.blueprints.users.models import User
+from typing import Dict, Optional, Set, Type
 from inspect import getmembers, isfunction, getmodule
-from pathlib import Path, PosixPath
+from pathlib import Path
 from databases import Database
 from sanic.exceptions import SanicException
 from .decorator import execute
@@ -44,13 +43,13 @@ class BaseExecutor:
                 setattr(executor, name, execute(func))
 
     @staticmethod
-    def isgetter(obj):
+    def isgetter(obj) -> bool:
         """Check if the object is a method that starts with get_"""
         if isfunction(obj):
             return obj.__name__.startswith("get_")
         return False
 
     @staticmethod
-    def load_sql(path: Path):
+    def load_sql(path: Path) -> str:
         with open(path, "r") as f:
             return f.read()

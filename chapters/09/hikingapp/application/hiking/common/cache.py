@@ -15,9 +15,9 @@ async def set_cached_response(
     key: str,
     exp: int,
 ):
-    await redis.hmset(
+    await redis.hset(
         key,
-        {
+        mapping={
             b"body": response.body,
             b"status": str(response.status).encode("utf-8"),
             b"content_type": response.content_type.encode("utf-8"),

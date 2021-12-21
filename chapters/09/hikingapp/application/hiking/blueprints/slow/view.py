@@ -1,4 +1,4 @@
-from sanic import Blueprint, text
+from sanic import Blueprint, HTTPResponse, Request, text
 import random
 import asyncio
 from hiking.common.cache import cache_response
@@ -9,7 +9,7 @@ bp = Blueprint("Slow", url_prefix="/slow")
 
 @bp.get("")
 @cache_response("tortoise")
-async def wow_super_slow(request):
+async def wow_super_slow(request: Request) -> HTTPResponse:
     wait_time = 0
     for _ in range(10):
         t = random.random()

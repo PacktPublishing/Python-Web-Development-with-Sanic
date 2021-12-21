@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import List
 from hiking.common.dao.executor import BaseExecutor
 from .models import Hike
 
