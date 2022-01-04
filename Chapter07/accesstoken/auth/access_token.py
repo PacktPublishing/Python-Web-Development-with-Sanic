@@ -1,8 +1,11 @@
 from dataclasses import dataclass
-from .user import User
 from typing import Any, Dict
+
 import jwt
+from sanic import Request
 from sanic.log import error_logger
+
+from .user import User
 
 
 @dataclass
@@ -19,7 +22,7 @@ class AccessToken:
 
     @property
     def signature(self):
-        return self._parts[0]
+        return self._parts[1]
 
     @property
     def _parts(self):
@@ -52,3 +55,10 @@ def check_access_token(
         return False
 
     return True
+
+
+def get_token_from_request(request: Request) -> str:
+    access_token = request.cookies.get("access_token", "")
+    access_token_signature = request.cookies.get("access_token_signature", "")
+    token = ".".join([access_token, access_token_signature])
+    return token

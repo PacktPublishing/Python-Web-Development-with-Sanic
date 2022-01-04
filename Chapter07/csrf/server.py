@@ -1,12 +1,12 @@
+import os
 from base64 import b64decode, b64encode
-from typing import Literal
-
-from sanic import Sanic, text, Request, HTTPResponse
 from functools import wraps
 from inspect import isawaitable
-from sanic.exceptions import Forbidden
+from typing import Literal
+
 from cryptography.fernet import Fernet, InvalidToken
-import os
+from sanic import HTTPResponse, Request, Sanic, text
+from sanic.exceptions import Forbidden
 
 app = Sanic(__name__)
 app.config.FALLBACK_ERROR_FORMAT = "text"
@@ -60,7 +60,9 @@ async def mark_browser(_, response: HTTPResponse) -> None:
     response.cookies["browser_check"]["httponly"] = True
 
 
-def generate_csrf(secret: str, ref_length: int, padding: int) -> tuple[str, str]:
+def generate_csrf(
+    secret: str, ref_length: int, padding: int
+) -> tuple[str, str]:
     cipher = Fernet(secret)
     ref = os.urandom(ref_length)
     pad = os.urandom(padding)
@@ -83,9 +85,9 @@ def verify_csrf(secret: str, padding: int, ref: str, token: str) -> None:
 
 
 def csrf_check(request: Request) -> Literal[True]:
-    csrf_header = request.headers.get("x-xsrf-token")
-    csrf_cookie = request.cookies.get("csrf_token")
-    ref_token = request.cookies.get("ref_token")
+    csrf_header = request.headers.get("x-xsrf-token", "")
+    csrf_cookie = request.cookies.get("csrf_token", "")
+    ref_token = request.cookies.get("ref_token", "")
 
     try:
         verify_csrf(
@@ -110,7 +112,10 @@ async def inject_csrf_token(request: Request, response: HTTPResponse) -> None:
     response.cookies["myfavorite"]["samesite"] = None
     response.cookies["myfavorite"]["secure"] = True
 
-    if "csrf_token" not in request.cookies or "ref_token" not in request.cookies:
+    if (
+        "csrf_token" not in request.cookies
+        or "ref_token" not in request.cookies
+    ):
         ref, token = generate_csrf(
             request.app.config.CSRF_SECRET,
             request.app.config.CSRF_REF_LENGTH,

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <script>
+            function getCookie(key) {
+                let value = ''
+                document.cookie.split(';').forEach((e) => {
+                    if (e.includes(key)) {
+                        value = e.split('=')[1]
+                    }
+                })
+                return value
+            }
+
+        </script>
+    </head>
+
+    <body>
+        <div>
+            <button id="login">Login</button>
+            <code id="login_response"></code>
+        </div>
+        <div>
+            <button id="restricted">Restricted</button>
+            <code id="restricted_response"></code>
+        </div>
+        <div>
+            <button id="clear">Clear cookies</button>
+        </div>
+        <script>
+            const login = document.querySelector("#login")
+            const login_response = document.querySelector("#login_response")
+            const restricted = document.querySelector("#restricted")
+            const restricted_response = document.querySelector("#restricted_response")
+            const clear = document.querySelector("#clear")
+
+
+            async function doLogin() {
+                console.log("Performing login", new Date())
+                const response = await fetch(
+                    "http://localhost:7777/login",
+                    {
+                        method: "POST",
+                        body: JSON.stringify({ username: "foo", password: "bar" })
+                    },
+                )
+                return response
+            }
+
+
+            async function doRefresh() {
+                console.log("Performing refresh", new Date())
+                const response = await fetch(
+                    "http://localhost:7777/refresh",
+                    { method: "POST" },
+                )
+                return response
+            }
+
+            async function auth(login = false) {
+                let response
+                if (login) {
+                    response = await doLogin()
+                } else {
+                    response = await doRefresh()
+                }
+                const payload = (await response.json()).payload
+                const now = Date.now() / 1000 | 0
+                const timeout = (payload.exp - now) * 0.9
+                login_response.innerHTML = JSON.stringify(payload)
+                setTimeout(auth, timeout * 1000)
+            }
+
+            login.addEventListener("click", async (e) => {
+                await auth(true)
+            })
+
+            restricted.addEventListener("click", async (e) => {
+                const response = await fetch(
+                    "http://localhost:7777"
+                )
+                console.log(response)
+                restricted_response.innerHTML = `${response.status} ${response.statusText}`
+            })
+            clear.addEventListener("click", async (e) => {
+                document.cookie.split(";").forEach(function (c) {
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                })
+            })
+        </script>
+    </body>
+
+</html>

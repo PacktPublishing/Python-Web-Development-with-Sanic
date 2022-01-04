@@ -1,13 +1,13 @@
 from functools import partial
-from sanic import Sanic, text, HTTPResponse, Request
-from sanic import response
+
+from sanic import HTTPResponse, Request, Sanic, response, text
 
 app = Sanic(__name__)
 app.config.ALLOWED_ORIGINS = [
     "http://mysite.com",
-    "http://localhost:8888",
-    "http://127.0.0.1:8888",
-    "http://127.0.0.1:7777",
+    # "http://localhost:8888",
+    # "http://127.0.0.1:8888",
+    # "http://127.0.0.1:7777",
 ]
 
 
@@ -68,4 +68,4 @@ async def add_cors_headers(request: Request, response: HTTPResponse) -> None:
 
     response.headers["vary"] = "origin"
     response.headers["access-control-allow-origin"] = origin
-    response.headers["access-control-expose-headers"] = "foobar"
+    # response.headers["access-control-expose-headers"] = "foobar"

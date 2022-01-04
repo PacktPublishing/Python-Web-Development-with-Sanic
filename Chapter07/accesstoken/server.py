@@ -1,21 +1,27 @@
 from datetime import datetime, timedelta
-from typing import Union
 
-from sanic import HTTPResponse, Request, Sanic, text, json
-from auth.decorator import protected
-from auth.user import authenticate_login_credentials, get_user_from_request
-from auth.access_token import generate_access_token, check_access_token
-from auth.refresh_token import generate_token, store_refresh_token
-from auth.cookie import set_cookie
 from bcrypt import checkpw
-from sanic.exceptions import Forbidden, SanicException
-from sanic.response import empty
+from sanic import HTTPResponse, Request, Sanic, json, text
+from sanic.exceptions import Forbidden
+
+from auth.access_token import (
+    check_access_token,
+    generate_access_token,
+    get_token_from_request,
+)
+from auth.cookie import set_cookie
+from auth.decorator import protected
+from auth.refresh_token import generate_token, store_refresh_token
+from auth.user import authenticate_login_credentials, get_user_from_request
 
 app = Sanic(__name__)
 app.config.JWT_SECRET = "somesecret"
 app.config.JWT_EXPIRATION = timedelta(minutes=10)
 app.config.REFRESH_EXPIRATION = timedelta(hours=24)
-app.config.COOKIE_DOMAIN = "127.0.0.1"
+app.config.COOKIE_DOMAIN = "localhost"
+
+app.static("/periodic", "./index-refresh-periodically.html")
+app.static("/exception", "./index-refresh-on-exception.html")
 
 
 @app.get("/")
@@ -38,7 +44,7 @@ async def login(request: Request) -> HTTPResponse:
         int(access_token_exp.timestamp()),
     )
     refresh_token, hashed_key = generate_token()
-    await store_refresh_token(user, hashed_key)
+    await store_refresh_token(user, hashed_key.decode())
 
     response = json({"payload": access_token.payload})
     set_cookie(
@@ -51,7 +57,7 @@ async def login(request: Request) -> HTTPResponse:
     )
     set_cookie(
         response,
-        "access_token",
+        "access_token_signature",
         access_token.signature,
         httponly=True,
         domain=request.app.config.COOKIE_DOMAIN,
@@ -72,14 +78,13 @@ async def login(request: Request) -> HTTPResponse:
 
 @app.post("/refresh")
 @protected
-async def refresh_access_token(request: Request) -> Union[HTTPResponse, SanicException]:
-    print(f"{request.cookies}")
+async def refresh_access_token(request: Request) -> HTTPResponse:
     user = await get_user_from_request(request)
-    access_token = request.cookies["access_token"]
+    access_token = get_token_from_request(request)
     refresh_token = request.cookies["refresh_token"]
 
     if not user.refresh_hash:
-        return Forbidden("Invalid request")
+        raise Forbidden("Invalid request")
 
     is_valid_refresh = checkpw(
         refresh_token.encode("utf-8"),
@@ -90,25 +95,26 @@ async def refresh_access_token(request: Request) -> Union[HTTPResponse, SanicExc
     )
 
     if not is_valid_refresh or not is_valid_access:
-        return Forbidden("Invalid request")
+        raise Forbidden("Invalid request")
 
-    access_token = generate_access_token(
+    access_token_exp = datetime.now() + request.app.config.JWT_EXPIRATION
+    generated_access_token = generate_access_token(
         user,
         request.app.config.JWT_SECRET,
-        datetime.utcnow() + request.app.config.JWT_EXPIRATION,
+        int(access_token_exp.timestamp()),
     )
 
-    response = empty()
+    response = json({"payload": generated_access_token.payload})
     set_cookie(
         response,
         "access_token",
-        access_token.header_payload,
+        generated_access_token.header_payload,
         httponly=False,
     )
     set_cookie(
         response,
-        "access_token",
-        access_token.signature,
+        "access_token_signature",
+        generated_access_token.signature,
         httponly=True,
     )
 
