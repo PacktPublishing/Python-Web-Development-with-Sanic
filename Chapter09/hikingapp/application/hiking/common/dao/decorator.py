@@ -1,6 +1,6 @@
-from inspect import getsource, getsourcelines, isclass, signature
+from inspect import getsourcelines, signature
 from functools import wraps
-from typing import List, get_origin, get_args
+from typing import get_origin, get_args
 from sanic.exceptions import SanicException, NotFound
 
 

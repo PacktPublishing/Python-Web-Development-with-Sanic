@@ -1,5 +1,5 @@
 from importlib import import_module
-from unittest.mock import AsyncMock, MagicMock, patch, Mock
+from unittest.mock import AsyncMock
 import pytest
 from sanic import Sanic
 import testing3.path.to.some_db_connection

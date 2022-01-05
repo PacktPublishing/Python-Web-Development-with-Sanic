@@ -1,6 +1,4 @@
 # test_some_blueprint.py
-from unittest.mock import AsyncMock, patch
-from aiohttp import request
 import pytest
 from testing3.path.to.some_blueprint import bp
 

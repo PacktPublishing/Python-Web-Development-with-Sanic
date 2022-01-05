@@ -1,4 +1,4 @@
-from typing import Any, List, Mapping, Optional, Type, Union
+from typing import Any, List, Mapping, Optional, Type
 from hiking.common.dao.hydrator import Hydrator
 from hiking.common.base_model import BaseModel
 from hiking.blueprints.hikes.models import Hike
