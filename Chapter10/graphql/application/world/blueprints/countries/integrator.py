@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional
-from world.common.dao.integrator import BaseIntegrator
-from graphql.type import GraphQLResolveInfo
-from world.blueprints.countries.models import Country
-from world.blueprints.countries.executor import CountryExecutor
+from typing import Any, List, Optional, TYPE_CHECKING
+
 from ariadne import ObjectType
+from graphql.type import GraphQLResolveInfo
 
 from world.blueprints.cities.executor import CityExecutor
+from world.blueprints.countries.executor import CountryExecutor
+from world.blueprints.countries.models import Country
 from world.blueprints.languages.executor import LanguageExecutor
+from world.common.dao.integrator import BaseIntegrator
 
 if TYPE_CHECKING:
     from world.blueprints.cities.models import City
@@ -22,25 +23,27 @@ class CountryIntegrator(BaseIntegrator):
         executor = CityExecutor(info.context.app.ctx.postgres)
         return await executor.get_city_by_id(country.capital)
 
-    def make_additional_schema(self):
+    def make_additional_schema(self) -> ObjectType:
         country = ObjectType("Country")
         country.set_field("capital", self.resolve_capital)
         country.set_field("languages", self.resolve_languages)
         return country
 
-    def make_query_def(self):
+    def make_query_def(self) -> List[str]:
         return [
             "country(name: String!): Country",
             "countries(limit: Int, offset: Int): [Country]",
         ]
 
-    async def query_country(self, _, info: GraphQLResolveInfo, *, name: str) -> Country:
+    async def query_country(
+        self, _: Any, info: GraphQLResolveInfo, *, name: str
+    ) -> Country:
         executor = CountryExecutor(info.context.app.ctx.postgres)
         return await executor.get_country_by_name(name=name)
 
     async def query_countries(
         self,
-        _,
+        _: Any,
         info: GraphQLResolveInfo,
         *,
         limit: Optional[int] = None,

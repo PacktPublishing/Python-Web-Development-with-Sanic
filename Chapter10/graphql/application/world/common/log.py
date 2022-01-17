@@ -1,38 +1,26 @@
-from functools import partial
 import logging
-from os import environ
-from sanic import Sanic
 import sys
+from functools import partial
+from typing import Any, cast
+
+from sanic import Sanic
 
 app_logger = logging.getLogger("myapplogger")
 
 
 class CustomFormatter(logging.Formatter):
-    # _fmt = "%(asctime)s [%(levelname)s] [%(name)s] [{details}] - %(message)s"
     _fmt = (
         "[%(asctime)s] [%(name)s:%(levelname)s] [%(filename)s:%(lineno)s] %(message)s"
     )
-
-    # def format(self, record):
-    #     # details = ["root_id", "request_id"]
-    #     # if record.levelname == "DEBUG":
-    #     #     details.extend(["current_name", "current_id"])
-    #     # details_format = " ".join(
-    #     #     [f"{item}=%({item})s" for item in details if getattr(record, item, "")]
-    #     # )
-
-    #     # fmt = self._task_fmt if hasattr(record, "root_id") else self._fmt
-    #     # fmt = fmt.format(details=details_format)
-
-    #     # if prefix := COLORS.get(record.levelname):
-    #     #     fmt = f"{prefix}{fmt}\033[0m"
-    #     formatter = Formatter(fmt)
-    #     return formatter.format(record)
 
 
 DEFAULT_LOGGING_FORMAT = "[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)s] %(request_info)s%(message)s"
 DEFAULT_LOGGING_DATEFORMAT = "%Y-%m-%d %H:%M:%S %z"
 old_factory = logging.getLogRecordFactory()
+
+
+class RequestInfoLogRecord(logging.LogRecord):
+    request_info: str
 
 
 class ColorFormatter(logging.Formatter):
@@ -43,7 +31,7 @@ class ColorFormatter(logging.Formatter):
         "CRITICAL": "\033[02;47m\033[01;31m",
     }
 
-    def format(self, record) -> str:
+    def format(self, record: logging.LogRecord) -> str:
         prefix = self.COLORS.get(record.levelname)
         message = super().format(record)
 
@@ -53,7 +41,7 @@ class ColorFormatter(logging.Formatter):
         return message
 
 
-def _get_formatter(is_local, fmt, datefmt):
+def _get_formatter(is_local: bool, fmt: str, datefmt: str) -> logging.Formatter:
     formatter_type = logging.Formatter
     if is_local and sys.stdout.isatty():
         formatter_type = ColorFormatter
@@ -64,8 +52,8 @@ def _get_formatter(is_local, fmt, datefmt):
     )
 
 
-def _record_factory(*args, app, **kwargs):
-    record = old_factory(*args, **kwargs)
+def _record_factory(*args: Any, app: Sanic, **kwargs: Any) -> RequestInfoLogRecord:
+    record = cast(RequestInfoLogRecord, old_factory(*args, **kwargs))
     record.request_info = ""
 
     if hasattr(app.ctx, "request"):
@@ -77,7 +65,7 @@ def _record_factory(*args, app, **kwargs):
     return record
 
 
-def setup_logging(app: Sanic):
+def setup_logging(app: Sanic) -> None:
     environment = app.config.get("ENVIRONMENT", "local")
     logging_level = app.config.get(
         "LOGGING_LEVEL", logging.DEBUG if environment == "local" else logging.INFO

@@ -1,3 +1,4 @@
+version: "3.8"
 services:
   app:
     build: ./application
@@ -12,7 +13,6 @@ services:
       --factory
       --auto-reload
       world.server:create_app
-      # --workers=2
     volumes:
       - ./application/world:/app/world
     environment:
@@ -25,61 +25,3 @@ services:
     ports:
       - 5432:5432
     command: ["postgres", "-c", "log_statement=all"]
-
-
-# docker-compose.yml
-# version: "3.7"
-# services:
-#   db:
-#     image: aa8y/postgres-dataset:world
-#     # image: aa8y/postgres-dataset:dellstore
-#     # image: aa8y/postgres-dataset:iso3166
-#     # image: aa8y/postgres-dataset:usda
-#     # image: aa8y/postgres-dataset:sportsdb
-#     # image: samuelbjohnson/baseball-postgres
-#     # image: mujz/pagila
-
-#     expose:
-#       - "5432"
-#     ports:
-#       - "5432:5432"
-#     # environment:
-#     #   PGDATA: /var/lib/postgresql/data/local
-#     #   POSTGRES_DB: skynet
-#     #   POSTGRES_USER: ava
-#       # POSTGRES_PASSWORD: secret
-#     # volumes:
-#     #   - "pgdata:/var/lib/postgresql/data/local"
-#     #   - "./pginit:/docker-entrypoint-initdb.d"
-#     restart: always
-
-# volumes:
-#   pgdata:
-
-
-
-
-
-
-
-# docker-compose.yml
-# version: "3.7"
-# services:
-#   db:
-#     image: postgres:9.6
-#     expose:
-#       - "5432"
-#     ports:
-#       - "15432:5432"
-#     environment:
-#       PGDATA: /var/lib/postgresql/data/local
-#       POSTGRES_DB: skynet
-#       POSTGRES_USER: ava
-#       POSTGRES_PASSWORD: avasecret1
-#     volumes:
-#       - "pgdata:/var/lib/postgresql/data/local"
-#       - "./pginit:/docker-entrypoint-initdb.d"
-#     restart: always
-
-# volumes:
-#   pgdata:

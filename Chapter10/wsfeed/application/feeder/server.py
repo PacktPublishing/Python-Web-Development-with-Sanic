@@ -1,9 +1,10 @@
 from sanic import Sanic
+
 from feeder.common.log import setup_logging
 
 
-def create_app():
-    app = Sanic(__name__)
+def create_app() -> Sanic:
+    app = Sanic("feeder")
     setup_logging(app)
 
     from feeder.middleware import request_context  # noqa

@@ -1,7 +1,8 @@
 from sanic import Sanic
-from wadsworth.blueprints.view import bp
-from wadsworth.blueprints.info.view import bp as info_view
+
 from wadsworth.applications.redirect import attach_redirect_app
+from wadsworth.blueprints.info.view import bp as info_view
+from wadsworth.blueprints.view import bp
 
 
 def create_app():

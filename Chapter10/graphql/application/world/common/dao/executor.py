@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-from typing import Dict, Optional, Set, Type
-from inspect import getmembers, isfunction, getmodule
+from inspect import getmembers, getmodule, isfunction
 from pathlib import Path
+from typing import Any, Dict, Optional, Set, Type, cast
+
 from databases import Database
 from sanic.exceptions import SanicException
+
 from .decorator import execute
 from .hydrator import Hydrator
 
@@ -40,16 +42,16 @@ class BaseExecutor:
             for name, func in getmembers(executor, cls.isgetter):
                 path = base / "queries" / f"{name}.sql"
                 cls._queries[name] = cls.load_sql(path)
-                setattr(executor, name, execute(func, executor))
+                setattr(executor, name, execute(func))
 
     @staticmethod
-    def isgetter(obj):
+    def isgetter(obj: Any) -> bool:
         """Check if the object is a method that starts with get_"""
         if isfunction(obj):
             return obj.__name__.startswith("get_")
         return False
 
     @staticmethod
-    def load_sql(path: Path):
+    def load_sql(path: Path) -> str:
         with open(path, "r") as f:
             return f.read()

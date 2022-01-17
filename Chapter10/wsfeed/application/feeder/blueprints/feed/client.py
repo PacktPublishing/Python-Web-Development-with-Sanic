@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from uuid import UUID, uuid4
+
 from aioredis import Redis
 from sanic.server.websockets.impl import WebsocketImplProtocol
 
@@ -14,12 +15,12 @@ class Client:
     def __hash__(self) -> int:
         return self.uid.int
 
-    async def receiver(self):
+    async def receiver(self) -> None:
         while True:
             message = await self.protocol.recv()
             if not message:
                 break
             await self.redis.publish(self.channel_name, message)
 
-    async def shutdown(self):
+    async def shutdown(self) -> None:
         await self.protocol.close()

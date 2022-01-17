@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 from world.common.base_model import BaseModel
 
 

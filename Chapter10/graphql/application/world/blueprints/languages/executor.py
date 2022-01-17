@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from world.blueprints.languages.models import Language
 from world.common.dao.executor import BaseExecutor
 
