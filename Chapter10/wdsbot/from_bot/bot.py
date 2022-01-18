@@ -1,12 +1,15 @@
-import nextcord
+from typing import cast
+
+from nextcord.client import Client
+from nextcord.message import Message
 from sanic.server.async_server import AsyncioServer
 
 from server import app
 
-client = nextcord.Client()
+client = Client()
 
 
-async def runner(app_server: AsyncioServer):
+async def runner(app_server: AsyncioServer) -> None:
     app.is_running = True
     try:
         await app_server.startup()
@@ -25,7 +28,7 @@ async def runner(app_server: AsyncioServer):
 
 
 @client.event
-async def on_ready():
+async def on_ready() -> None:
     app.config.GENERAL_CHANNEL_ID = 9999999999
     app.ctx.wadsworth = client
     app.ctx.general = client.get_channel(app.config.GENERAL_CHANNEL_ID)
@@ -39,7 +42,7 @@ async def on_ready():
 
 
 @client.event
-async def on_message(message):
+async def on_message(message: Message) -> None:
     if message.author == client.user:
         return
 

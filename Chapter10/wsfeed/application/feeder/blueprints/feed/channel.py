@@ -1,12 +1,15 @@
 from __future__ import annotations
-from aioredis import Redis
-from aioredis.client import PubSub
+
 from asyncio import Lock
 from typing import Set, Tuple
-from sanic.log import logger
-from .client import Client
+
+from aioredis import Redis
+from aioredis.client import PubSub
 from aioredis.exceptions import PubSubError
+from sanic.log import logger
 from sanic.server.websockets.impl import WebsocketImplProtocol
+
+from .client import Client
 
 
 class ChannelCache(dict):

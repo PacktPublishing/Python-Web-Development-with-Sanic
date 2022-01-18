@@ -1,16 +1,52 @@
-from typing import Any, List, Mapping, Optional, Type, Union
+from typing import Any, List, Literal, Mapping, Optional, Type, TypeVar, Union, overload
+
 from world.common.base_model import BaseModel
+
+ModelT = TypeVar("ModelT", bound=BaseModel)
+RecordT = Mapping[str, Any]
+ExcludeT = Optional[List[str]]
 
 
 class Hydrator:
+    @overload
     def hydrate(
         self,
-        record: Union[Mapping[str, Any], List[Mapping[str, Any]]],
-        model: Type[BaseModel],
+        record: RecordT,
+        model: Type[ModelT],
+        as_list: Literal[False],
+        exclude: ExcludeT = None,
+    ) -> ModelT:
+        ...
+
+    @overload
+    def hydrate(
+        self,
+        record: List[RecordT],
+        model: Type[ModelT],
+        as_list: Literal[True],
+        exclude: ExcludeT = None,
+    ) -> List[ModelT]:
+        ...
+
+    @overload
+    def hydrate(
+        self,
+        record: Union[RecordT, List[RecordT]],
+        model: Type[ModelT],
         as_list: bool,
-        exclude: Optional[List[str]] = None,
-    ):
-        if as_list and isinstance(record, list):
+        exclude: ExcludeT = None,
+    ) -> Union[ModelT, List[ModelT]]:
+        ...
+
+    def hydrate(
+        self,
+        record: Union[RecordT, List[RecordT]],
+        model: Type[ModelT],
+        as_list: bool,
+        exclude: ExcludeT = None,
+    ) -> Union[ModelT, List[ModelT]]:
+        if as_list:
+            record = [record] if not isinstance(record, list) else record
             return [self.do_hydration(r, model, exclude) for r in record]
         if isinstance(record, list):
             raise TypeError("Unexpectedly found multiple records while hydrating")
@@ -18,11 +54,11 @@ class Hydrator:
 
     def do_hydration(
         self,
-        record: Mapping[str, Any],
-        model: Type[BaseModel],
-        exclude: Optional[List[str]] = None,
-    ):
-        obj = model(**record)  # type: ignore
+        record: RecordT,
+        model: Type[ModelT],
+        exclude: ExcludeT = None,
+    ) -> ModelT:
+        obj = model(**record)
         if exclude:
             obj.__state__.exclude = exclude
         return obj

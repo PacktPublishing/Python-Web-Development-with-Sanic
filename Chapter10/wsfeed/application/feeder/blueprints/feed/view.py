@@ -1,12 +1,14 @@
-from sanic import Blueprint
+from sanic import Blueprint, Request
 from sanic.log import logger
+from sanic.server.websockets.impl import WebsocketImplProtocol
+
 from .channel import Channel
 
 bp = Blueprint("Feed", url_prefix="/feed")
 
 
 @bp.websocket("/<channel_name>")
-async def feed(request, ws, channel_name):
+async def feed(request: Request, ws: WebsocketImplProtocol, channel_name: str) -> None:
     logger.info("Incoming WS request")
     channel, is_existing = await Channel.get(
         request.app.ctx.pubsub, request.app.ctx.redis, channel_name

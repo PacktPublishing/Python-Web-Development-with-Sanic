@@ -1,8 +1,11 @@
 from dataclasses import asdict, dataclass, field
 from datetime import date, datetime
-from typing import List
-import ujson
+from typing import List, TypeVar, Union
 from uuid import UUID
+
+import ujson
+
+T = TypeVar("T")
 
 
 @dataclass
@@ -16,7 +19,7 @@ class BaseModel:
     def __post_init__(self) -> None:
         self.__state__ = MetaState()
 
-    def __json__(self):
+    def __json__(self) -> str:
         return ujson.dumps(
             {
                 k: self._clean(v)
@@ -26,7 +29,7 @@ class BaseModel:
         )
 
     @staticmethod
-    def _clean(value):
+    def _clean(value: T) -> Union[str, T]:
         if isinstance(value, (date, datetime)):
             return value.isoformat()
         elif isinstance(value, UUID):

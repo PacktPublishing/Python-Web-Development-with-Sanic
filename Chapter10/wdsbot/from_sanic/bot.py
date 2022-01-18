@@ -1,10 +1,11 @@
-import nextcord
+from nextcord.client import Client
+from nextcord.message import Message
 
-client = nextcord.Client()
+client = Client()
 
 
 @client.event
-async def on_message(message):
+async def on_message(message: Message) -> None:
     if message.author == client.user:
         return
 

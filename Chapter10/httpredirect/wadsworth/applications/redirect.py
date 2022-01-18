@@ -1,19 +1,22 @@
+from typing import Any
+
 from sanic import Sanic
-from sanic.server.async_server import AsyncioServer
-from wadsworth.blueprints.info.view import bp as info_view
-from wadsworth.blueprints.redirect.view import bp as redirect_view
 from sanic.exceptions import ServerError
 from sanic.handlers import ErrorHandler
+from sanic.server.async_server import AsyncioServer
+
+from wadsworth.blueprints.info.view import bp as info_view
+from wadsworth.blueprints.redirect.view import bp as redirect_view
 
 
-def attach_redirect_app(main_app: Sanic):
+def attach_redirect_app(main_app: Sanic) -> Sanic:
     redirect_app = Sanic("RedirectApp")
     redirect_app.blueprint(info_view)
     redirect_app.blueprint(redirect_view)
     redirect_app.ctx.main_app = main_app
 
     @main_app.before_server_start
-    async def startup_redirect_app(main: Sanic, _):
+    async def startup_redirect_app(main: Sanic, _: Any) -> None:
         app_server = await redirect_app.create_server(
             port=8080, return_asyncio_server=True
         )
@@ -23,7 +26,7 @@ def attach_redirect_app(main_app: Sanic):
         main_app.add_task(runner(redirect_app, app_server))
 
     @main_app.after_server_stop
-    async def shutdown_redirect_app(main: Sanic, _):
+    async def shutdown_redirect_app(main: Sanic, _: Any) -> None:
         await main.ctx.redirect.before_stop()
         await main.ctx.redirect.close()
         for connection in main.ctx.redirect.connections:
@@ -32,17 +35,17 @@ def attach_redirect_app(main_app: Sanic):
         redirect_app.is_stopping = False
 
     @redirect_app.before_server_start
-    async def before_server_start(*_):
+    async def before_server_start(*_: Any) -> None:
         print("before_server_start")
 
     @redirect_app.after_server_stop
-    async def after_server_stop(*_):
+    async def after_server_stop(*_: Any) -> None:
         print("after_server_stop")
 
     return redirect_app
 
 
-async def runner(app: Sanic, app_server: AsyncioServer):
+async def runner(app: Sanic, app_server: AsyncioServer) -> None:
     app.is_running = True
     try:
         app.signalize()

@@ -1,11 +1,13 @@
-from sanic import Sanic
+from typing import Any
+
 import aioredis
+from sanic import Sanic
 
 app = Sanic.get_app()
 
 
 @app.before_server_start
-async def setup_redis(app, _):
+async def setup_redis(app: Sanic, _: Any) -> None:
     app.ctx.redis_pool = aioredis.BlockingConnectionPool.from_url(
         app.config.REDIS_DSN, max_connections=app.config.REDIS_MAX
     )
@@ -14,5 +16,5 @@ async def setup_redis(app, _):
 
 
 @app.after_server_stop
-async def shutdown_redis(app, _):
+async def shutdown_redis(app: Sanic, _: Any) -> None:
     await app.ctx.redis_pool.disconnect()
