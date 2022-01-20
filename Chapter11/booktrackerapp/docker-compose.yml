@@ -1,0 +1,50 @@
+services:
+  app:
+    tty: true
+    build: ./application
+    ports:
+      - 7777:7777
+      - 35729:35729
+    depends_on:
+      - db-postgres
+      - db-redis
+    command:
+      sanic
+      --port=7777
+      --host=0.0.0.0
+      --workers=1
+      --factory
+      --dev
+      --access-log
+      --reload-dir=./ui/src
+      booktracker.server:create_app
+    volumes:
+      - ./application/booktracker:/app/booktracker
+      - ./application/ui:/app/ui
+      - ./application/node_modules:/app/node_modules
+      - /home/adam/Projects/Sanic/sanic/sanic:/usr/local/lib/python3.10/site-packages/sanic
+      - /home/adam/Projects/Sanic/sanic-ext/sanic_ext:/usr/local/lib/python3.10/site-packages/sanic_ext
+    environment:
+      SANIC_LOCAL: "True"
+      SANIC_POSTGRES_DSN: "postgres://postgres:foobar@db-postgres:5432"
+      SANIC_POSTGRES_MIN: 6
+      SANIC_POSTGRES_MAX: 12
+      SANIC_REDIS_DSN: "redis://db-redis:6379"
+      SANIC_REDIS_MAX: 12
+      SANIC_KEEP_ALIVE_TIMEOUT: 1
+      SANIC_HTTP_AUTO_TRACE: "True"
+      SANIC_GITHUB_OAUTH_CLIENT_ID: "ba4b3cad05f708b7f5c9"
+      SANIC_GITHUB_OAUTH_SECRET: ${GITHUB_OAUTH_SECRET}
+      SANIC_CSRF_SECRET: ${CSRF_SECRET}
+  db-postgres:
+    build: ./postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=foobar
+    volumes:
+      - ./postgres/initial.sql:/docker-entrypoint-initdb.d/initial.sql
+  db-redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
