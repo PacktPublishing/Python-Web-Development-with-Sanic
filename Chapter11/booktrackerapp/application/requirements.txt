@@ -1,7 +1,0 @@
-aioredis
-cryptography
-databases[postgresql]
-httpx
-sanic
-sanic-ext
-sanic-jwt
