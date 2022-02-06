@@ -18,7 +18,10 @@ class GitHubOAuthLogin(BaseEndpoint):
 
         response = redirect(url)
 
-        if "csrf_token" not in request.cookies or "ref_token" not in request.cookies:
+        if (
+            "csrf_token" not in request.cookies
+            or "ref_token" not in request.cookies
+        ):
             ref, token = generate_csrf(
                 request.app.config.CSRF_SECRET,
                 request.app.config.CSRF_REF_LENGTH,

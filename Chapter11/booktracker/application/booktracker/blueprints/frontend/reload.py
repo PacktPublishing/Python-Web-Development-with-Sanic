@@ -39,7 +39,9 @@ async def file_reloaded() -> None:
 
 
 @livereload.websocket("/livereload")
-async def livereload_handler(request: Request, ws: WebsocketImplProtocol) -> None:
+async def livereload_handler(
+    request: Request, ws: WebsocketImplProtocol
+) -> None:
     reload_path = {
         "command": "reload",
         "path": str(request.app.config.UI_DIR / "public" / "index.html"),

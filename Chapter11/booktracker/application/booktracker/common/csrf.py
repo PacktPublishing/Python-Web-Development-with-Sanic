@@ -2,7 +2,16 @@ import os
 from base64 import b64decode, b64encode
 from functools import wraps
 from inspect import isawaitable
-from typing import Any, Callable, Coroutine, Literal, Optional, Tuple, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Coroutine,
+    Literal,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 
 from cryptography.fernet import Fernet, InvalidToken
 from sanic import HTTPResponse, Request, Sanic
@@ -53,10 +62,14 @@ def setup_csrf(app: Sanic) -> None:
 
     @app.on_response
     async def mark_browser(_, response: HTTPResponse):
-        set_cookie(response=response, key="browser_check", value="1", httponly=True)
+        set_cookie(
+            response=response, key="browser_check", value="1", httponly=True
+        )
 
 
-def generate_csrf(secret: str, ref_length: int, padding: int) -> Tuple[str, str]:
+def generate_csrf(
+    secret: str, ref_length: int, padding: int
+) -> Tuple[str, str]:
     cipher = Fernet(secret)
     ref = os.urandom(ref_length)
     pad = os.urandom(padding)

@@ -16,7 +16,9 @@ class BookHydrator(Hydrator):
         model: Type[T],
         exclude: Optional[List[str]] = None,
     ) -> T:
-        series = Series(**loads(record["series"])) if record["series"] else None
+        series = (
+            Series(**loads(record["series"])) if record["series"] else None
+        )
         kwargs = {
             **record,
             "author": Author(**loads(record["author"])),

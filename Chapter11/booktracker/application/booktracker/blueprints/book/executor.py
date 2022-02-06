@@ -14,7 +14,9 @@ class BookExecutor(BaseExecutor):
         offset: int = 0,
     ) -> List[Book]:
         query = self._queries["get_all_books"]
-        records = await self.db.fetch_all(query, {"limit": limit, "offset": offset})
+        records = await self.db.fetch_all(
+            query, {"limit": limit, "offset": offset}
+        )
         books = self.hydrator.hydrate(records, Book, True, exclude)
 
         return books

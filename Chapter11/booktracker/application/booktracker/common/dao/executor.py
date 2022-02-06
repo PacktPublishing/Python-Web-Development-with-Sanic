@@ -21,7 +21,9 @@ class BaseExecutor:
     _fallback_hydrator: Hydrator
     db: Database
 
-    def __init__(self, db: Database, hydrator: Optional[Hydrator] = None) -> None:
+    def __init__(
+        self, db: Database, hydrator: Optional[Hydrator] = None
+    ) -> None:
         self.db = db
         self._hydrator = hydrator
 

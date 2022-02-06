@@ -30,7 +30,9 @@ if TYPE_CHECKING:
 logger = getLogger("booktracker")
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
-FuncT = Callable[..., Coroutine[None, None, Optional[Union[ModelT, List[ModelT]]]]]
+FuncT = Callable[
+    ..., Coroutine[None, None, Optional[Union[ModelT, List[ModelT]]]]
+]
 RecordT = Mapping[str, Any]
 ExcludeT = Optional[List[str]]
 
@@ -100,10 +102,16 @@ def execute(func: FuncT[ModelT]) -> FuncT[ModelT]:
                     raise NotFound(f"Did not find {model.__name__}")
                 elif not results and is_create:
                     results = values
-                elif is_create and isinstance(results, dict) and len(results) == 1:
+                elif (
+                    is_create
+                    and isinstance(results, dict)
+                    and len(results) == 1
+                ):
                     results.update(values)
 
-                return self.hydrator.hydrate(results, model, as_list, exclude)  # noqa
+                return self.hydrator.hydrate(
+                    results, model, as_list, exclude
+                )  # noqa
 
             return await f(*args, **kwargs)
 

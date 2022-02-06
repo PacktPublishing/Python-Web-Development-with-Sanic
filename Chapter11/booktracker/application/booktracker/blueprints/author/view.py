@@ -21,7 +21,9 @@ class AuthorListView(HTTPMethodView, attach=bp):
     async def get(request: Request, pagination: Pagination) -> HTTPResponse:
         executor = AuthorExecutor(request.app.ctx.postgres)
         kwargs = {**pagination.to_dict()}
-        getter: Callable[..., Awaitable[List[Author]]] = executor.get_all_authors
+        getter: Callable[
+            ..., Awaitable[List[Author]]
+        ] = executor.get_all_authors
 
         if name := request.args.get("name"):
             kwargs["name"] = name
