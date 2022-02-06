@@ -7,7 +7,7 @@ app = Sanic.get_app("BooktrackerApp")
 
 
 @app.after_server_start
-async def setup_request_context(app: Sanic, _: Any) -> None:
+async def setup_request_context(app: Sanic, _) -> None:
     app.ctx.request = ContextVar("request")
 
 
