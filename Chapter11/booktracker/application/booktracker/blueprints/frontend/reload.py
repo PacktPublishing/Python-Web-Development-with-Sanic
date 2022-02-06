@@ -82,7 +82,7 @@ def setup_livereload(bp: Blueprint) -> None:
             app.add_task(runner(livereload, app.ctx.livereload_server))
 
     @bp.before_server_stop
-    async def stop(app: Sanic, _: Any) -> None:
+    async def stop(app: Sanic, _) -> None:
         await app.ctx.livereload_server.close()
 
     @bp.before_server_start
