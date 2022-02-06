@@ -86,7 +86,7 @@ def setup_livereload(bp: Blueprint) -> None:
         await app.ctx.livereload_server.close()
 
     @bp.before_server_start
-    async def check_reloads(app: Sanic, _: Any) -> None:
+    async def check_reloads(app: Sanic, _) -> None:
         do_rebuild = False
         if reloaded := app.config.get("RELOADED_FILES"):
             reloaded = reloaded.split(",")
