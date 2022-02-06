@@ -72,7 +72,7 @@ def setup_livereload(bp: Blueprint) -> None:
     livereload.ctx.bp = bp
 
     @bp.before_server_start
-    async def start(app: Sanic, _: Any) -> None:
+    async def start(app: Sanic, _) -> None:
         global livereload
         livereload.config.UI_DIR = app.config.UI_DIR
         app.ctx.livereload_server = await livereload.create_server(
