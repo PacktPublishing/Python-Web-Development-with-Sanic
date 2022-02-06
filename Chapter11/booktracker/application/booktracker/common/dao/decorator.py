@@ -1,16 +1,38 @@
+from __future__ import annotations
+
 from functools import wraps
 from inspect import getsourcelines, signature
 from logging import getLogger
-from typing import Any, Callable, Coroutine, List, Mapping, Optional, Type, TypeVar, Union, cast, get_args, get_origin
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Coroutine,
+    List,
+    Mapping,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+    get_args,
+    get_origin,
+)
+
+from sanic.exceptions import NotFound, SanicException
 
 from booktracker.common.base_model import BaseModel
 from booktracker.common.eid import generate
-from sanic.exceptions import NotFound, SanicException
+
+if TYPE_CHECKING:
+    from booktracker.common.dao.executor import BaseExecutor
 
 logger = getLogger("booktracker")
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
-FuncT = Callable[..., Coroutine[None, None, Optional[Union[ModelT, List[ModelT]]]]]
+FuncT = Callable[
+    ..., Coroutine[None, None, Optional[Union[ModelT, List[ModelT]]]]
+]
 RecordT = Mapping[str, Any]
 ExcludeT = Optional[List[str]]
 
@@ -24,7 +46,6 @@ def execute(func: FuncT[ModelT]) -> FuncT[ModelT]:
     we should automatically execute the in memory SQL, and passing the results
     off to the base Hydrator.
     """
-    from booktracker.common.dao.executor import BaseExecutor
     sig = signature(func)
     src = getsourcelines(func)
 
@@ -49,7 +70,9 @@ def execute(func: FuncT[ModelT]) -> FuncT[ModelT]:
 
     def decorator(f: FuncT[ModelT]) -> FuncT[ModelT]:
         @wraps(f)
-        async def decorated_function(*args: Any, **kwargs: Any) -> Optional[Union[ModelT, List[ModelT]]]:
+        async def decorated_function(
+            *args: Any, **kwargs: Any
+        ) -> Optional[Union[ModelT, List[ModelT]]]:
             if is_create and "eid" in sig.parameters.keys():
                 kwargs["eid"] = generate(width=24)
 
@@ -62,9 +85,9 @@ def execute(func: FuncT[ModelT]) -> FuncT[ModelT]:
                 values = {**bound.arguments}
                 values.pop("self")
                 exclude: ExcludeT = values.pop("exclude", None)
-                results: Union[RecordT, List[RecordT]] = await getattr(self.db, method_name)(
-                    query=query, values=values
-                )
+                results: Union[RecordT, List[RecordT]] = await getattr(
+                    self.db, method_name
+                )(query=query, values=values)
 
                 if results:
                     if isinstance(results, list):
@@ -79,10 +102,16 @@ def execute(func: FuncT[ModelT]) -> FuncT[ModelT]:
                     raise NotFound(f"Did not find {model.__name__}")
                 elif not results and is_create:
                     results = values
-                elif is_create and isinstance(results, dict) and len(results) == 1:
+                elif (
+                    is_create
+                    and isinstance(results, dict)
+                    and len(results) == 1
+                ):
                     results.update(values)
 
-                return self.hydrator.hydrate(results, model, as_list, exclude)  # noqa
+                return self.hydrator.hydrate(
+                    results, model, as_list, exclude
+                )  # noqa
 
             return await f(*args, **kwargs)
 

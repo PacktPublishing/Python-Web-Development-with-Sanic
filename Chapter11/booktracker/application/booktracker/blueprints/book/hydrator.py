@@ -8,6 +8,7 @@ from booktracker.common.dao.hydrator import Hydrator
 
 T = TypeVar("T", bound=BaseModel)
 
+
 class BookHydrator(Hydrator):
     def do_hydration(
         self,
@@ -15,7 +16,9 @@ class BookHydrator(Hydrator):
         model: Type[T],
         exclude: Optional[List[str]] = None,
     ) -> T:
-        series = Series(**loads(record["series"])) if record["series"] else None
+        series = (
+            Series(**loads(record["series"])) if record["series"] else None
+        )
         kwargs = {
             **record,
             "author": Author(**loads(record["author"])),

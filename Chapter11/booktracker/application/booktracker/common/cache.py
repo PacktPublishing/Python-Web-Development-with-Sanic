@@ -43,7 +43,9 @@ async def get_cached_response(
     return {}
 
 
-def cache_response(build_key: str, exp: int = 60 * 60 * 72) -> Callable[[FuncT], FuncT]:
+def cache_response(
+    build_key: str, exp: int = 60 * 60 * 72
+) -> Callable[[FuncT], FuncT]:
     """
     Cache an expensive response in Redis for quicker retrieval on subsequent
     calls to the endpoint
@@ -57,7 +59,9 @@ def cache_response(build_key: str, exp: int = 60 * 60 * 72) -> Callable[[FuncT],
             cache: Redis = request.app.ctx.redis
             key = make_key(build_key, request)
 
-            if cached_response := await get_cached_response(request, cache, key):
+            if cached_response := await get_cached_response(
+                request, cache, key
+            ):
                 response = raw(**cached_response)
             else:
                 response = await f(request, *handler_args, **handler_kwargs)

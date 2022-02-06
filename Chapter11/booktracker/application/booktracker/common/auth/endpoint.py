@@ -1,10 +1,11 @@
 from typing import Optional
 
-from booktracker.common.cookie import set_cookie
-from booktracker.common.csrf import generate_csrf
 from sanic import HTTPResponse, Request
 from sanic.response import redirect
 from sanic_jwt import BaseEndpoint
+
+from booktracker.common.cookie import set_cookie
+from booktracker.common.csrf import generate_csrf
 
 
 class GitHubOAuthLogin(BaseEndpoint):
@@ -17,7 +18,10 @@ class GitHubOAuthLogin(BaseEndpoint):
 
         response = redirect(url)
 
-        if "csrf_token" not in request.cookies or "ref_token" not in request.cookies:
+        if (
+            "csrf_token" not in request.cookies
+            or "ref_token" not in request.cookies
+        ):
             ref, token = generate_csrf(
                 request.app.config.CSRF_SECRET,
                 request.app.config.CSRF_REF_LENGTH,

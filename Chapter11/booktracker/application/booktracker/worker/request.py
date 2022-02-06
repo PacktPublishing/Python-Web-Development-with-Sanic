@@ -1,7 +1,8 @@
 from typing import Any
 
-from booktracker.common.eid import generate
 from sanic import Request
+
+from booktracker.common.eid import generate
 
 
 class BooktrackerRequest(Request):

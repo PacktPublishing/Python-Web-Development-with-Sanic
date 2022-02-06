@@ -3,12 +3,13 @@ from typing import Any, Dict, Optional
 
 import httpx
 from aioredis import Redis
-from booktracker.blueprints.user.executor import UserExecutor
 from sanic import Request
 from sanic.exceptions import NotFound, Unauthorized
 
-from .model import RefreshTokenKey
+from booktracker.blueprints.user.executor import UserExecutor
+
 from ...blueprints.user.model import User
+from .model import RefreshTokenKey
 
 logger = getLogger("booktracker")
 
@@ -54,7 +55,9 @@ async def authenticate(request: Request) -> User:
     async with httpx.AsyncClient() as session:
         response = await session.get(
             "https://api.github.com/user",
-            headers={"Authorization": f"token {response.json()['access_token']}"},
+            headers={
+                "Authorization": f"token {response.json()['access_token']}"
+            },
         )
 
     if b"error" in response.content or response.status_code != 200:
@@ -78,7 +81,9 @@ async def authenticate(request: Request) -> User:
     return user
 
 
-async def retrieve_user(request: Request, payload: Dict[str, Any]) -> Optional[User]:
+async def retrieve_user(
+    request: Request, payload: Dict[str, Any]
+) -> Optional[User]:
     if not payload:
         return None
 
@@ -86,7 +91,9 @@ async def retrieve_user(request: Request, payload: Dict[str, Any]) -> Optional[U
     return await executor.get_by_eid(eid=payload["eid"])
 
 
-async def payload_extender(payload: Dict[str, Any], user: User) -> Dict[str, Any]:
+async def payload_extender(
+    payload: Dict[str, Any], user: User
+) -> Dict[str, Any]:
     payload.update({"user": user.to_dict()})
     return payload
 

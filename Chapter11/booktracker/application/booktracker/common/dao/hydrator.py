@@ -1,4 +1,14 @@
-from typing import Any, List, Literal, Mapping, Optional, Type, TypeVar, Union, overload
+from typing import (
+    Any,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
 from booktracker.common.base_model import BaseModel
 
@@ -44,7 +54,9 @@ class Hydrator:
             record = [record] if not isinstance(record, list) else record
             return [self.do_hydration(r, model, exclude) for r in record]
         if isinstance(record, list):
-            raise TypeError("Unexpectedly found multiple records while hydrating")
+            raise TypeError(
+                "Unexpectedly found multiple records while hydrating"
+            )
         return self.do_hydration(record, model, exclude)
 
     def do_hydration(

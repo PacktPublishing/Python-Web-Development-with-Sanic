@@ -2,12 +2,22 @@ import os
 from base64 import b64decode, b64encode
 from functools import wraps
 from inspect import isawaitable
-from typing import Any, Callable, Coroutine, Literal, Optional, Tuple, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Coroutine,
+    Literal,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 
-from booktracker.common.cookie import set_cookie
 from cryptography.fernet import Fernet, InvalidToken
 from sanic import HTTPResponse, Request, Sanic
 from sanic.exceptions import Forbidden
+
+from booktracker.common.cookie import set_cookie
 
 FuncT = Callable[..., Union[Coroutine[None, None, HTTPResponse], HTTPResponse]]
 
@@ -20,7 +30,9 @@ class CSRFFailure(Forbidden):
 def csrf_protected(func: FuncT) -> FuncT:
     def decorator(f: FuncT) -> FuncT:
         @wraps(f)
-        async def decorated_function(request: Request, *args: Any, **kwargs: Any) -> HTTPResponse:
+        async def decorated_function(
+            request: Request, *args: Any, **kwargs: Any
+        ) -> HTTPResponse:
 
             origin = request.headers.get("origin")
             if request.ctx.from_browser and (
@@ -50,10 +62,14 @@ def setup_csrf(app: Sanic) -> None:
 
     @app.on_response
     async def mark_browser(_, response: HTTPResponse):
-        set_cookie(response=response, key="browser_check", value="1", httponly=True)
+        set_cookie(
+            response=response, key="browser_check", value="1", httponly=True
+        )
 
 
-def generate_csrf(secret: str, ref_length: int, padding: int) -> Tuple[str, str]:
+def generate_csrf(
+    secret: str, ref_length: int, padding: int
+) -> Tuple[str, str]:
     cipher = Fernet(secret)
     ref = os.urandom(ref_length)
     pad = os.urandom(padding)
