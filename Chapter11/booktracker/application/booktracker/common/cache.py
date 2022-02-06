@@ -1,12 +1,14 @@
 from functools import wraps
-from typing import Dict, Union
+from typing import Any, Callable, Coroutine, Dict, Union, cast
 
 from aioredis.client import Redis
 from sanic import Request
 from sanic.response import HTTPResponse, raw
 
+FuncT = Callable[..., Coroutine[None, None, HTTPResponse]]
 
-def make_key(build_key, request):
+
+def make_key(build_key: str, request: Request) -> str:
     return ":".join(["cached-response", build_key, request.name])
 
 
@@ -15,7 +17,7 @@ async def set_cached_response(
     redis: Redis,
     key: str,
     exp: int,
-):
+) -> None:
     await redis.hmset(
         key,
         {
@@ -29,7 +31,7 @@ async def set_cached_response(
 
 async def get_cached_response(
     request: Request, redis: Redis, key: str
-) -> Dict[str, Union[str, int]]:
+) -> Dict[str, Any]:
     exists = await redis.hgetall(key)
     if exists and not request.args.get("refresh"):
         cached_response = {
@@ -41,15 +43,19 @@ async def get_cached_response(
     return {}
 
 
-def cache_response(build_key, exp: int = 60 * 60 * 72):
+def cache_response(
+    build_key: str, exp: int = 60 * 60 * 72
+) -> Callable[[FuncT], FuncT]:
     """
     Cache an expensive response in Redis for quicker retrieval on subsequent
     calls to the endpoint
     """
 
-    def decorator(f):
+    def decorator(f: FuncT) -> FuncT:
         @wraps(f)
-        async def decorated_function(request, *handler_args, **handler_kwargs):
+        async def decorated_function(
+            request: Request, *handler_args: Any, **handler_kwargs: Any
+        ) -> HTTPResponse:
             cache: Redis = request.app.ctx.redis
             key = make_key(build_key, request)
 
@@ -63,6 +69,6 @@ def cache_response(build_key, exp: int = 60 * 60 * 72):
 
             return response
 
-        return decorated_function
+        return cast(FuncT, decorated_function)
 
     return decorator

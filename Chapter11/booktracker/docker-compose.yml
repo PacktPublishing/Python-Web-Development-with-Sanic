@@ -2,6 +2,7 @@ services:
   app:
     tty: true
     build: ./application
+    user: "1000:1000"
     ports:
       - 7777:7777
       - 35729:35729
@@ -9,21 +10,27 @@ services:
       - db-postgres
       - db-redis
     command:
-      sanic
-      --port=7777
-      --host=0.0.0.0
-      --workers=1
-      --factory
-      --dev
-      --access-log
-      --reload-dir=./ui/src
-      booktracker.server:create_app
+      - wait-for-it
+      - "db-postgres:5432"
+      - --strict
+      - --
+      - wait-for-it
+      - "db-redis:6379"
+      - --strict
+      - --
+      - sanic
+      - --port=7777
+      - --host=0.0.0.0
+      - --workers=1
+      - --factory
+      - --dev
+      - --access-log
+      - --reload-dir=./ui/src
+      - booktracker.server:create_app
     volumes:
       - ./application/booktracker:/app/booktracker
       - ./application/ui:/app/ui
       - ./application/node_modules:/app/node_modules
-      - /home/adam/Projects/Sanic/sanic/sanic:/usr/local/lib/python3.10/site-packages/sanic
-      - /home/adam/Projects/Sanic/sanic-ext/sanic_ext:/usr/local/lib/python3.10/site-packages/sanic_ext
     environment:
       SANIC_LOCAL: "True"
       SANIC_POSTGRES_DSN: "postgres://postgres:foobar@db-postgres:5432"
