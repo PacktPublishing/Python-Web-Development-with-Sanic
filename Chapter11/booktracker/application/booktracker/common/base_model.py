@@ -4,7 +4,7 @@ from dataclasses import dataclass, field, fields
 from datetime import date, datetime
 from enum import Enum
 from inspect import getmembers
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 import ujson
@@ -29,7 +29,7 @@ class Config:
 def pkdataclass(decorated_class, *args, **kwargs):
     def wrapper(cls):
         orig = getattr(cls, "__init__")
-        derived = dataclass(cls, *args, **kwargs)
+        derived = dataclass(cls, *args, **kwargs)  # noqa
         setattr(derived, "__default_init__", derived.__init__)
         setattr(derived, "__init__", orig)
         return derived
@@ -67,7 +67,7 @@ class BaseModel(metaclass=BaseModelMeta):
             kwargs[self.__config__.pk_field] = None
         self.__default_init__(*args, **kwargs)  # type: ignore
 
-    def __json__(self):
+    def __json__(self) -> str:
         return ujson.dumps(self.to_dict(clean=True))
 
     @property
@@ -80,11 +80,11 @@ class BaseModel(metaclass=BaseModelMeta):
         clean: bool = False,
         include_null: Optional[bool] = None,
         cascade: bool = True,
-    ):
+    ) -> Dict[str, Any]:
         if include_null is not None:
             self.set_state("include_null", include_null, cascade)
         output = {}
-        for fld in fields(self):
+        for fld in fields(self):  # noqa
             value = getattr(self, fld.name)
             if isinstance(value, BaseModel):
                 value = value.to_dict(clean=clean)
@@ -107,7 +107,7 @@ class BaseModel(metaclass=BaseModelMeta):
         return isinstance(obj, BaseModel)
 
     @staticmethod
-    def _clean(value):
+    def _clean(value: Any) -> Any:
         if isinstance(value, (date, datetime)):
             return value.isoformat()
         elif isinstance(value, UUID):

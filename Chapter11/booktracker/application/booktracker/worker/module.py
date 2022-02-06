@@ -3,7 +3,7 @@ from importlib import import_module
 from sanic import Sanic
 
 
-def setup_modules(app: Sanic, *module_names: str):
+def setup_modules(app: Sanic, *module_names: str) -> None:
     """
     Load some modules
     """

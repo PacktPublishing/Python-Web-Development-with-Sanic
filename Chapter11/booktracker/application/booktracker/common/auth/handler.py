@@ -1,5 +1,5 @@
 from logging import getLogger
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import httpx
 from aioredis import Redis
@@ -8,11 +8,12 @@ from sanic import Request
 from sanic.exceptions import NotFound, Unauthorized
 
 from .model import RefreshTokenKey
+from ...blueprints.user.model import User
 
 logger = getLogger("booktracker")
 
 
-async def authenticate(request: Request):
+async def authenticate(request: Request) -> User:
     """
     Perform authentication handling by taking a GitHub authorization code
     and exchanging it for a GitHub access_token.
@@ -53,9 +54,7 @@ async def authenticate(request: Request):
     async with httpx.AsyncClient() as session:
         response = await session.get(
             "https://api.github.com/user",
-            headers={
-                "Authorization": f"token {response.json()['access_token']}"
-            },
+            headers={"Authorization": f"token {response.json()['access_token']}"},
         )
 
     if b"error" in response.content or response.status_code != 200:
@@ -79,7 +78,7 @@ async def authenticate(request: Request):
     return user
 
 
-async def retrieve_user(request: Request, payload: Dict[str, Any]):
+async def retrieve_user(request: Request, payload: Dict[str, Any]) -> Optional[User]:
     if not payload:
         return None
 
@@ -87,12 +86,14 @@ async def retrieve_user(request: Request, payload: Dict[str, Any]):
     return await executor.get_by_eid(eid=payload["eid"])
 
 
-async def payload_extender(payload, user):
+async def payload_extender(payload: Dict[str, Any], user: User) -> Dict[str, Any]:
     payload.update({"user": user.to_dict()})
     return payload
 
 
-async def store_refresh_token(user_id, refresh_token, request):
+async def store_refresh_token(
+    user_id: str, refresh_token: str, request: Request
+) -> None:
     """The actual keyword argument being passed is `user_id`, but the
     value that it is retrieving is the eid"""
     key = RefreshTokenKey(user_id)
@@ -100,7 +101,7 @@ async def store_refresh_token(user_id, refresh_token, request):
     await redis.set(str(key), refresh_token)
 
 
-async def retrieve_refresh_token(request, user_id):
+async def retrieve_refresh_token(request: Request, user_id: str) -> str:
     key = RefreshTokenKey(user_id)
     redis: Redis = request.app.ctx.redis
     return await redis.get(str(key))

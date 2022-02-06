@@ -37,17 +37,19 @@ class BookListView(HTTPMethodView, attach=bp):
         else:
             author = await author_executor.get_author_by_eid(eid=body.author)
 
+        series_id = None
         if body.series:
             if not body.series_is_eid:
                 series = await series_executor.create_book_series(name=body.series)
             else:
                 series = await series_executor.get_book_series_by_eid(eid=body.series)
+            series_id = series.series_id
 
         if not body.title_is_eid:
             book = await book_executor.create_book(
                 title=body.title,
                 author_id=author.author_id,
-                series_id=series.series_id if body.series else None,
+                series_id=series_id,
             )
         else:
             book = await book_executor.get_book_by_eid(eid=body.title)

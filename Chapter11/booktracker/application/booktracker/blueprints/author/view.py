@@ -3,7 +3,7 @@ from typing import Awaitable, Callable, List
 
 from booktracker.common.csrf import csrf_protected
 from booktracker.common.pagination import Pagination
-from sanic import Blueprint, Request, json
+from sanic import Blueprint, HTTPResponse, Request, json
 from sanic.exceptions import NotFound
 from sanic.views import HTTPMethodView
 from sanic_ext import validate
@@ -17,7 +17,7 @@ logger = getLogger("booktracker")
 
 class AuthorListView(HTTPMethodView, attach=bp):
     @staticmethod
-    async def get(request: Request, pagination: Pagination):
+    async def get(request: Request, pagination: Pagination) -> HTTPResponse:
         executor = AuthorExecutor(request.app.ctx.postgres)
         kwargs = {**pagination.to_dict()}
         getter: Callable[
@@ -38,7 +38,7 @@ class AuthorListView(HTTPMethodView, attach=bp):
     @staticmethod
     @validate(json=CreateAuthorBody)
     @csrf_protected
-    async def post(request: Request, body: CreateAuthorBody):
+    async def post(request: Request, body: CreateAuthorBody) -> HTTPResponse:
         executor = AuthorExecutor(request.app.ctx.postgres)
         author = await executor.create_author(**body.to_dict())
         return json({"author": author}, status=201)

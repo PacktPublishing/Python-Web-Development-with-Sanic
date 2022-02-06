@@ -1,8 +1,10 @@
+from typing import Any
+
 from booktracker.common.eid import generate
 from sanic import Request
 
 
 class BooktrackerRequest(Request):
     @classmethod
-    def generate_id(*_):
+    def generate_id(*_: Any) -> str:
         return generate()

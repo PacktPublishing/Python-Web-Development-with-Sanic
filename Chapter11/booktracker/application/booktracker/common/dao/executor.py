@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from inspect import getmembers, getmodule, isfunction
 from pathlib import Path
-from typing import Dict, Optional, Set, Type
+from typing import Any, Dict, Optional, Set, Type
 
 from databases import Database
 from sanic.exceptions import SanicException
@@ -56,7 +56,7 @@ class BaseExecutor:
                 setattr(executor, name, execute(func))
 
     @staticmethod
-    def isoperation(obj):
+    def isoperation(obj: Any) -> bool:
         """Check if the object is a method that starts with get_ or create_"""
         if isfunction(obj):
             return (
@@ -67,6 +67,6 @@ class BaseExecutor:
         return False
 
     @staticmethod
-    def load_sql(path: Path):
+    def load_sql(path: Path) -> str:
         with open(path, "r") as f:
             return f.read()

@@ -2,11 +2,14 @@ import os
 from base64 import b64decode, b64encode
 from functools import wraps
 from inspect import isawaitable
+from typing import Any, Callable, Coroutine, Literal, Optional, Tuple, Union, cast
 
 from booktracker.common.cookie import set_cookie
 from cryptography.fernet import Fernet, InvalidToken
 from sanic import HTTPResponse, Request, Sanic
 from sanic.exceptions import Forbidden
+
+FuncT = Callable[..., Union[Coroutine[None, None, HTTPResponse], HTTPResponse]]
 
 
 class CSRFFailure(Forbidden):
@@ -14,10 +17,10 @@ class CSRFFailure(Forbidden):
     quiet = False
 
 
-def csrf_protected(func):
-    def decorator(f):
+def csrf_protected(func: FuncT) -> FuncT:
+    def decorator(f: FuncT) -> FuncT:
         @wraps(f)
-        async def decorated_function(request, *args, **kwargs):
+        async def decorated_function(request: Request, *args: Any, **kwargs: Any) -> HTTPResponse:
 
             origin = request.headers.get("origin")
             if request.ctx.from_browser and (
@@ -31,14 +34,14 @@ def csrf_protected(func):
             if isawaitable(response):
                 response = await response
 
-            return response
+            return cast(HTTPResponse, response)
 
-        return decorated_function
+        return cast(FuncT, decorated_function)
 
     return decorator(func)
 
 
-def setup_csrf(app: Sanic):
+def setup_csrf(app: Sanic) -> None:
     @app.on_request
     async def check_request(request: Request):
         request.ctx.from_browser = (
@@ -47,12 +50,10 @@ def setup_csrf(app: Sanic):
 
     @app.on_response
     async def mark_browser(_, response: HTTPResponse):
-        set_cookie(
-            response=response, key="browser_check", value="1", httponly=True
-        )
+        set_cookie(response=response, key="browser_check", value="1", httponly=True)
 
 
-def generate_csrf(secret, ref_length, padding):
+def generate_csrf(secret: str, ref_length: int, padding: int) -> Tuple[str, str]:
     cipher = Fernet(secret)
     ref = os.urandom(ref_length)
     pad = os.urandom(padding)
@@ -61,7 +62,9 @@ def generate_csrf(secret, ref_length, padding):
     return ref.hex(), b64encode(pad + pretoken).decode("utf-8")
 
 
-def verify_csrf(secret, padding, ref, token):
+def verify_csrf(
+    secret: str, padding: int, ref: Optional[str], token: Optional[str]
+) -> None:
     if not ref or not token:
         raise InvalidToken("Token is incorrect")
 
@@ -74,7 +77,7 @@ def verify_csrf(secret, padding, ref, token):
         raise InvalidToken("Token is incorrect")
 
 
-def csrf_check(request: Request):
+def csrf_check(request: Request) -> Literal[True]:
     csrf_header = request.headers.get("x-xsrf-token")
     csrf_cookie = request.cookies.get("csrf_token")
     ref_token = request.cookies.get("ref_token")
