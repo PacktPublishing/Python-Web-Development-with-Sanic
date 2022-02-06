@@ -1,12 +1,13 @@
 from logging import getLogger
 from typing import Awaitable, Callable, List
 
-from booktracker.common.csrf import csrf_protected
-from booktracker.common.pagination import Pagination
 from sanic import Blueprint, HTTPResponse, Request, json
 from sanic.exceptions import NotFound
 from sanic.views import HTTPMethodView
 from sanic_ext import validate
+
+from booktracker.common.csrf import csrf_protected
+from booktracker.common.pagination import Pagination
 
 from .executor import AuthorExecutor
 from .model import Author, CreateAuthorBody
@@ -20,9 +21,7 @@ class AuthorListView(HTTPMethodView, attach=bp):
     async def get(request: Request, pagination: Pagination) -> HTTPResponse:
         executor = AuthorExecutor(request.app.ctx.postgres)
         kwargs = {**pagination.to_dict()}
-        getter: Callable[
-            ..., Awaitable[List[Author]]
-        ] = executor.get_all_authors
+        getter: Callable[..., Awaitable[List[Author]]] = executor.get_all_authors
 
         if name := request.args.get("name"):
             kwargs["name"] = name

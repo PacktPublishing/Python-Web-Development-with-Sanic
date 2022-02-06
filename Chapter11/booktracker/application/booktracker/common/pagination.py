@@ -1,8 +1,10 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, field
 
-from booktracker.common.base_model import BaseModel
 from sanic import Request, Sanic
+
+from booktracker.common.base_model import BaseModel
 
 
 @dataclass

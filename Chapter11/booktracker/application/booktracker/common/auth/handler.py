@@ -3,12 +3,13 @@ from typing import Any, Dict, Optional
 
 import httpx
 from aioredis import Redis
-from booktracker.blueprints.user.executor import UserExecutor
 from sanic import Request
 from sanic.exceptions import NotFound, Unauthorized
 
-from .model import RefreshTokenKey
+from booktracker.blueprints.user.executor import UserExecutor
+
 from ...blueprints.user.model import User
+from .model import RefreshTokenKey
 
 logger = getLogger("booktracker")
 

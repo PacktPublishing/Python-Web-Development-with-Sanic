@@ -4,10 +4,11 @@ from functools import wraps
 from inspect import isawaitable
 from typing import Any, Callable, Coroutine, Literal, Optional, Tuple, Union, cast
 
-from booktracker.common.cookie import set_cookie
 from cryptography.fernet import Fernet, InvalidToken
 from sanic import HTTPResponse, Request, Sanic
 from sanic.exceptions import Forbidden
+
+from booktracker.common.cookie import set_cookie
 
 FuncT = Callable[..., Union[Coroutine[None, None, HTTPResponse], HTTPResponse]]
 
@@ -20,7 +21,9 @@ class CSRFFailure(Forbidden):
 def csrf_protected(func: FuncT) -> FuncT:
     def decorator(f: FuncT) -> FuncT:
         @wraps(f)
-        async def decorated_function(request: Request, *args: Any, **kwargs: Any) -> HTTPResponse:
+        async def decorated_function(
+            request: Request, *args: Any, **kwargs: Any
+        ) -> HTTPResponse:
 
             origin = request.headers.get("origin")
             if request.ctx.from_browser and (

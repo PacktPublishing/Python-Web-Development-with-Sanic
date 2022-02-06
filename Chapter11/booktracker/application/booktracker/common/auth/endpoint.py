@@ -1,10 +1,11 @@
 from typing import Optional
 
-from booktracker.common.cookie import set_cookie
-from booktracker.common.csrf import generate_csrf
 from sanic import HTTPResponse, Request
 from sanic.response import redirect
 from sanic_jwt import BaseEndpoint
+
+from booktracker.common.cookie import set_cookie
+from booktracker.common.csrf import generate_csrf
 
 
 class GitHubOAuthLogin(BaseEndpoint):

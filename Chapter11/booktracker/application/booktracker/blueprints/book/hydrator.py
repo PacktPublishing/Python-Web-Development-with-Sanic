@@ -8,6 +8,7 @@ from booktracker.common.dao.hydrator import Hydrator
 
 T = TypeVar("T", bound=BaseModel)
 
+
 class BookHydrator(Hydrator):
     def do_hydration(
         self,

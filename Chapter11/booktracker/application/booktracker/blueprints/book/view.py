@@ -2,16 +2,17 @@ from logging import getLogger
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from asyncpg.exceptions import UniqueViolationError
-from booktracker.blueprints.author.executor import AuthorExecutor
-from booktracker.blueprints.user.executor import UserExecutor
-from booktracker.blueprints.user.model import User
-from booktracker.common.csrf import csrf_protected
-from booktracker.common.pagination import Pagination
 from sanic import Blueprint, Request, json
 from sanic.exceptions import NotFound
 from sanic.views import HTTPMethodView
 from sanic_ext import validate
 from sanic_jwt.decorators import inject_user, protected
+
+from booktracker.blueprints.author.executor import AuthorExecutor
+from booktracker.blueprints.user.executor import UserExecutor
+from booktracker.blueprints.user.model import User
+from booktracker.common.csrf import csrf_protected
+from booktracker.common.pagination import Pagination
 
 from .executor import BookExecutor, BookSeriesExecutor
 from .hydrator import BookHydrator

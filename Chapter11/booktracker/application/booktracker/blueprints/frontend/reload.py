@@ -1,14 +1,13 @@
 from asyncio.subprocess import PIPE, create_subprocess_shell
 from logging import getLogger
-from typing import Any
 
 import ujson
+from sanic import Blueprint, HTTPResponse, Request, Sanic
+from sanic.response import file
 from sanic.server import AsyncioServer
 from sanic.server.websockets.impl import WebsocketImplProtocol
 
 from booktracker.common.log import setup_logging
-from sanic import Blueprint, HTTPResponse, Request, Sanic
-from sanic.response import file
 
 logger = getLogger("booktracker")
 livereload = Sanic("Livereload")
