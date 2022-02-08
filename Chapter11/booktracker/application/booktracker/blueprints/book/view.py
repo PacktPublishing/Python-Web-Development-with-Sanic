@@ -2,16 +2,17 @@ from logging import getLogger
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from asyncpg.exceptions import UniqueViolationError
-from booktracker.blueprints.author.executor import AuthorExecutor
-from booktracker.blueprints.user.executor import UserExecutor
-from booktracker.blueprints.user.model import User
-from booktracker.common.csrf import csrf_protected
-from booktracker.common.pagination import Pagination
 from sanic import Blueprint, Request, json
 from sanic.exceptions import NotFound
 from sanic.views import HTTPMethodView
 from sanic_ext import validate
 from sanic_jwt.decorators import inject_user, protected
+
+from booktracker.blueprints.author.executor import AuthorExecutor
+from booktracker.blueprints.user.executor import UserExecutor
+from booktracker.blueprints.user.model import User
+from booktracker.common.csrf import csrf_protected
+from booktracker.common.pagination import Pagination
 
 from .executor import BookExecutor, BookSeriesExecutor
 from .hydrator import BookHydrator
@@ -37,17 +38,23 @@ class BookListView(HTTPMethodView, attach=bp):
         else:
             author = await author_executor.get_author_by_eid(eid=body.author)
 
+        series_id = None
         if body.series:
             if not body.series_is_eid:
-                series = await series_executor.create_book_series(name=body.series)
+                series = await series_executor.create_book_series(
+                    name=body.series
+                )
             else:
-                series = await series_executor.get_book_series_by_eid(eid=body.series)
+                series = await series_executor.get_book_series_by_eid(
+                    eid=body.series
+                )
+            series_id = series.series_id
 
         if not body.title_is_eid:
             book = await book_executor.create_book(
                 title=body.title,
                 author_id=author.author_id,
-                series_id=series.series_id if body.series else None,
+                series_id=series_id,
             )
         else:
             book = await book_executor.get_book_by_eid(eid=body.title)
@@ -93,7 +100,10 @@ class BookDetailsView(HTTPMethodView, attach=bp, uri="/<eid>"):
     @staticmethod
     @inject_user()
     async def get(
-        request: Request, eid: str, user: Optional[User], executor: BookExecutor
+        request: Request,
+        eid: str,
+        user: Optional[User],
+        executor: BookExecutor,
     ):
         # executor = BookExecutor(request.app.ctx.postgres, BookHydrator())
         getter: Callable[..., Awaitable[Book]] = executor.get_book_by_eid
@@ -112,7 +122,9 @@ class BookLoveView(HTTPMethodView, attach=bp, uri="/<eid>/love"):
     @csrf_protected
     async def put(request: Request, eid: str, user: User):
         executor = BookExecutor(request.app.ctx.postgres, BookHydrator())
-        await executor.update_toggle_book_is_loved(eid=eid, user_id=user.user_id)
+        await executor.update_toggle_book_is_loved(
+            eid=eid, user_id=user.user_id
+        )
         return json({"ok": True})
 
 
@@ -134,7 +146,9 @@ class BookSeriesListView(HTTPMethodView, attach=bp, uri="/series"):
     async def get(request: Request, pagination: Pagination):
         executor = BookSeriesExecutor(request.app.ctx.postgres)
         kwargs = {**pagination.to_dict()}
-        getter: Callable[..., Awaitable[List[Series]]] = executor.get_all_series
+        getter: Callable[
+            ..., Awaitable[List[Series]]
+        ] = executor.get_all_series
 
         if name := request.args.get("name"):
             kwargs["name"] = name

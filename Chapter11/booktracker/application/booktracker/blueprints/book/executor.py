@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, List, Mapping, Optional
 
 from booktracker.blueprints.book.model import Book, Series
 from booktracker.common.dao.executor import BaseExecutor
@@ -76,7 +76,7 @@ class BookExecutor(BaseExecutor):
         values = {"title": title, "eid": eid}
         if record:
             values["book_id"] = record["book_id"]
-        book = self.hydrator.hydrate(values, Book, True)
+        book = self.hydrator.hydrate(values, Book, False)
 
         return book
 

@@ -11,7 +11,7 @@ from .handler import (
 )
 
 
-def setup_auth(app: Sanic):
+def setup_auth(app: Sanic) -> None:
     Initialize(
         app,
         url_prefix="/api/v1/auth",

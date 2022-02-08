@@ -1,7 +1,7 @@
 from logging import getLogger
 from pathlib import Path
 
-from sanic import Blueprint, Request
+from sanic import Blueprint, HTTPResponse, Request
 from sanic.response import file
 
 from .reload import setup_livereload
@@ -12,7 +12,7 @@ setup_livereload(bp)
 
 
 @bp.get("/<path:path>")
-async def index(request: Request, path: str):
+async def index(request: Request, path: str) -> HTTPResponse:
     base: Path = request.app.config.UI_DIR / "public"
     requested_path = base / path
     logger.debug(f"Checking for {requested_path}")

@@ -1,15 +1,43 @@
+from __future__ import annotations
+
 from functools import wraps
 from inspect import getsourcelines, signature
 from logging import getLogger
-from typing import get_args, get_origin
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Coroutine,
+    List,
+    Mapping,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+    get_args,
+    get_origin,
+)
 
-from booktracker.common.eid import generate
 from sanic.exceptions import NotFound, SanicException
+
+from booktracker.common.base_model import BaseModel
+from booktracker.common.eid import generate
+
+if TYPE_CHECKING:
+    from booktracker.common.dao.executor import BaseExecutor
 
 logger = getLogger("booktracker")
 
+ModelT = TypeVar("ModelT", bound=BaseModel)
+FuncT = Callable[
+    ..., Coroutine[None, None, Optional[Union[ModelT, List[ModelT]]]]
+]
+RecordT = Mapping[str, Any]
+ExcludeT = Optional[List[str]]
 
-def execute(func):
+
+def execute(func: FuncT[ModelT]) -> FuncT[ModelT]:
     """
     Responsible for executing a DB query and passing the result off to a
     hydrator.
@@ -25,14 +53,14 @@ def execute(func):
     # - Make sure that this is the ONLY part of the source, and also
     #   accept methods that only have a docstring and no code.
     auto_exec = src[0][-1].strip() in ("...", "pass")
-    model = sig.return_annotation
-    as_list = False
-    is_create = func.__name__.startswith("create_")
+    model: Type[ModelT] = sig.return_annotation
+    as_list: bool = False
+    is_create: bool = func.__name__.startswith("create_")
 
     if model is not None and (origin := get_origin(model)):
         as_list = bool(origin is list)
         if not as_list:
-            return SanicException(
+            raise SanicException(
                 f"{func} must return either a model or a list of models. "
                 "eg. -> Foo or List[Foo]"
             )
@@ -40,28 +68,30 @@ def execute(func):
 
     name = func.__name__
 
-    def decorator(f):
+    def decorator(f: FuncT[ModelT]) -> FuncT[ModelT]:
         @wraps(f)
-        async def decorated_function(*args, **kwargs):
+        async def decorated_function(
+            *args: Any, **kwargs: Any
+        ) -> Optional[Union[ModelT, List[ModelT]]]:
             if is_create and "eid" in sig.parameters.keys():
                 kwargs["eid"] = generate(width=24)
 
             if auto_exec:
-                self = args[0]
+                self: BaseExecutor = args[0]
                 query = self._queries[name]
                 method_name = "fetch_all" if as_list else "fetch_one"
                 bound = sig.bind(*args, **kwargs)
                 bound.apply_defaults()
                 values = {**bound.arguments}
                 values.pop("self")
-                exclude = values.pop("exclude", None)
-                results = await getattr(self.db, method_name)(
-                    query=query, values=values
-                )
+                exclude: ExcludeT = values.pop("exclude", None)
+                results: Union[RecordT, List[RecordT]] = await getattr(
+                    self.db, method_name
+                )(query=query, values=values)
 
                 if results:
                     if isinstance(results, list):
-                        results = list(map(dict, results))
+                        results = [dict(r) for r in results]
                     else:
                         results = dict(results)
 
@@ -72,13 +102,19 @@ def execute(func):
                     raise NotFound(f"Did not find {model.__name__}")
                 elif not results and is_create:
                     results = values
-                elif is_create and len(results) == 1:
+                elif (
+                    is_create
+                    and isinstance(results, dict)
+                    and len(results) == 1
+                ):
                     results.update(values)
 
-                return self.hydrator.hydrate(results, model, as_list, exclude)
+                return self.hydrator.hydrate(
+                    results, model, as_list, exclude
+                )  # noqa
 
             return await f(*args, **kwargs)
 
-        return decorated_function
+        return cast(FuncT[ModelT], decorated_function)
 
     return decorator(func)

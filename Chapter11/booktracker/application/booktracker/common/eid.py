@@ -5,7 +5,7 @@ REQUEST_ID_ALPHABET = ascii_letters + digits
 REQUEST_ID_ALPHABET_LENGTH = len(REQUEST_ID_ALPHABET)
 
 
-def generate(width: int = 0, fillchar: str = "x"):
+def generate(width: int = 0, fillchar: str = "x") -> str:
     """
     Generate a UUID and make is smaller
     """
