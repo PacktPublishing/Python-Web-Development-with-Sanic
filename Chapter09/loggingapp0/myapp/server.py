@@ -4,7 +4,7 @@ from myapp.common.log import app_logger, setup_logging
 
 
 def create_app():
-    app = Sanic(__name__)
+    app = Sanic("logging_app")
     setup_logging(app)
 
     @app.route("")

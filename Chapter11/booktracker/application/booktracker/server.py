@@ -35,9 +35,11 @@ def create_app(module_names: Optional[Sequence[str]] = None) -> Sanic:
 
     app = Sanic("BooktrackerApp", request_class=BooktrackerRequest)
     app.config.UI_DIR = Path(__file__).parent.parent / "ui"
-    app.config.CORS_ORIGINS = "http://localhost:7777"
     app.config.CSRF_REF_PADDING = 12
     app.config.CSRF_REF_LENGTH = 18
+
+    if not app.config.get("CORS_ORIGINS"):
+        app.config.CORS_ORIGINS = "http://localhost:7777"
 
     setup_logging(app)
     setup_pagination(app)
