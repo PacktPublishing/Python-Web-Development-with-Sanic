@@ -1,9 +1,10 @@
 from sanic import Request, Sanic, json
-from myapp.common.log import setup_logging, app_logger
+
+from myapp.common.log import app_logger, setup_logging
 
 
 def create_app():
-    app = Sanic(__name__)
+    app = Sanic("TracingApp")
     setup_logging(app)
 
     @app.route("")
