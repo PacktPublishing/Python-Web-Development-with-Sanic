@@ -144,6 +144,3 @@ async def book_a_stall(
 ):
     print(query)
     return text(request.ip)
-
-
-app.run(port=9999, debug=True)
