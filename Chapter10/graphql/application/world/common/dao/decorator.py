@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from functools import wraps
 from inspect import getsourcelines, signature
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Coroutine,
@@ -16,9 +19,10 @@ from typing import (
 )
 
 from sanic.exceptions import NotFound, SanicException
-
 from world.common.base_model import BaseModel
-from world.common.dao.executor import BaseExecutor
+
+if TYPE_CHECKING:
+    from world.common.dao.executor import BaseExecutor
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
 FuncT = Callable[..., Coroutine[None, None, Union[ModelT, List[ModelT]]]]
@@ -46,7 +50,9 @@ def execute(func: FuncT[ModelT]) -> FuncT[ModelT]:
 
     def decorator(f: FuncT[ModelT]) -> FuncT[ModelT]:
         @wraps(f)
-        async def decorated_function(*args: Any, **kwargs: Any) -> Union[ModelT, List[ModelT]]:
+        async def decorated_function(
+            *args: Any, **kwargs: Any
+        ) -> Union[ModelT, List[ModelT]]:
             if auto_exec:
                 self: BaseExecutor = args[0]
                 query = self._queries[name]

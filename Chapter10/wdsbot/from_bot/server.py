@@ -2,7 +2,7 @@ from typing import Any
 
 from sanic import HTTPResponse, Request, Sanic, json
 
-app = Sanic(__name__)
+app = Sanic("WDSApp")
 
 
 @app.get("/")

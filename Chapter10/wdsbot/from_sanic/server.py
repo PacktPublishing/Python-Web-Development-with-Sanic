@@ -6,7 +6,7 @@ from sanic import HTTPResponse, Request, Sanic, json
 
 from bot import client
 
-app = Sanic(__name__)
+app = Sanic("WDSApp")
 app.config.GENERAL_CHANNEL_ID = 9999999999
 app.config.DISCORD_TOKEN = "ABCDEFG"
 
