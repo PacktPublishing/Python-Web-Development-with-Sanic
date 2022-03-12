@@ -3,7 +3,7 @@ from inspect import getmembers
 from types import ModuleType
 from typing import Union
 
-from sanic.blueprints import Blueprint
+from sanic.blueprints import Blueprint, BlueprintGroup
 
 
 def autodiscover(app, *module_names: Union[str, ModuleType]):
@@ -15,7 +15,7 @@ def autodiscover(app, *module_names: Union[str, ModuleType]):
         nonlocal blueprints
 
         for _, member in getmembers(module):
-            if isinstance(member, Blueprint):
+            if isinstance(member, (Blueprint, BlueprintGroup)):
                 blueprints.add(member)
 
     for module in module_names:
