@@ -53,3 +53,9 @@ We also provide a PDF file that has color images of the screenshots/diagrams use
 **Adam Hopkins**
 is a self-taught programmer. He started programming in high school and has been using Python and building websites for more than 25 years. He is a licensed attorney and practiced law before transitioning into software engineering as a second career.
 Adam is the core developer and project maintainer of Sanic, a popular asynchronous Python framework and web server. Currently, he is a software engineering manager at PacketFabric, where he leads a team building backend web services. He is passionate about open source contributions and helping other developers to grow and learn. Adam lives in his desert home in the south of Israel with his wife and five children.
+
+## Updates
+
+### 2022-05-07
+
+ Update to [`autodiscovery.py`](https://github.com/PacktPublishing/Python-Web-Development-with-Sanic/blob/main/Chapter02/booktracker/src/utilities/autodiscovery.py) in Chapter 2 to resolve [#11](https://github.com/PacktPublishing/Python-Web-Development-with-Sanic/issues/11) related to a difference in behaviors between Sanic v21.3 and v21.6
