@@ -1,3 +1,7 @@
+## [Get this title for $10 on Packt's Spring Sale](https://www.packt.com/B17504?utm_source=github&utm_medium=packt-github-repo&utm_campaign=spring_10_dollar_2022)
+-----
+For a limited period, all eBooks and Videos are only $10. All the practical content you need \- by developers, for developers
+
 # Python Web Development with Sanic
 
 <a href="https://www.packtpub.com/product/python-web-development-with-sanic/9781801814416?utm_source=github&utm_medium=repository&utm_campaign=9781801814416"><img src="https://static.packt-cdn.com/products/9781801814416/cover/smaller" alt="Python Web Development with Sanic" height="256px" align="right"></a>
