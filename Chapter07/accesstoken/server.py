@@ -20,8 +20,8 @@ app.config.JWT_EXPIRATION = timedelta(minutes=10)
 app.config.REFRESH_EXPIRATION = timedelta(hours=24)
 app.config.COOKIE_DOMAIN = "localhost"
 
-app.static("/periodic", "./index-refresh-periodically.html")
-app.static("/exception", "./index-refresh-on-exception.html")
+app.static("/periodic", "./index-refresh-periodically.html", name="periodic")
+app.static("/exception", "./index-refresh-on-exception.html", name="exception")
 
 
 @app.get("/")
